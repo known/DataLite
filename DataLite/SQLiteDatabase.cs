@@ -136,6 +136,15 @@ namespace DataLite
             }
         }
 
+        /// <summary>
+        /// 将整表数据写入数据库，表名及栏位名需与数据库一致。
+        /// </summary>
+        /// <param name="table">数据表。</param>
+        public void WriteTable(DataTable table)
+        {
+            throw new NotSupportedException();
+        }
+
         private void PrepareCommand(SQLiteCommand cmd, SQLiteTransaction trans, Command command, CommandType cmdType = CommandType.Text)
         {
             if (trans != null)

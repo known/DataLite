@@ -68,12 +68,11 @@ namespace DataLite
         /// <returns>指定类型的单个对象。</returns>
         public T Query<T>(string sql, object param = null) where T : EntityBase
         {
-            var command = CommandCache.GetCommand(sql, param);
-            var data = database.Query(command);
-            if (data == null || data.Rows.Count == 0)
+            var row = QueryRow(sql, param);
+            if (row == null)
                 return default(T);
 
-            return GetEntity<T>(data.Rows[0]);
+            return GetEntity<T>(row);
         }
 
         /// <summary>
@@ -85,8 +84,7 @@ namespace DataLite
         /// <returns>指定类型的对象列表。</returns>
         public List<T> QueryList<T>(string sql, object param = null) where T : EntityBase
         {
-            var command = CommandCache.GetCommand(sql, param);
-            var data = database.Query(command);
+            var data = QueryTable(sql, param);
             if (data == null || data.Rows.Count == 0)
                 return null;
 
@@ -154,6 +152,104 @@ namespace DataLite
             {
                 database.Execute(commands[0]);
             }
+        }
+
+        /// <summary>
+        /// 将整表数据写入数据库，表名及栏位名需与数据库一致。
+        /// </summary>
+        /// <param name="table">数据表。</param>
+        public void WriteTable(DataTable table)
+        {
+            database.WriteTable(table);
+        }
+
+        /// <summary>
+        /// 执行查询SQL语句，返回数据表。
+        /// </summary>
+        /// <param name="sql">查询SQL语句。</param>
+        /// <param name="param">SQL语句参数。</param>
+        /// <returns>数据表。</returns>
+        public DataTable QueryTable(string sql, object param = null)
+        {
+            var command = CommandCache.GetCommand(sql, param);
+            return database.Query(command);
+        }
+
+        /// <summary>
+        /// 执行查询SQL语句，返回数据行。
+        /// </summary>
+        /// <param name="sql">查询SQL语句。</param>
+        /// <param name="param">SQL语句参数。</param>
+        /// <returns>数据行。</returns>
+        public DataRow QueryRow(string sql, object param = null)
+        {
+            var command = CommandCache.GetCommand(sql, param);
+            var data = database.Query(command);
+            if (data == null || data.Rows.Count == 0)
+                return null;
+
+            return data.Rows[0];
+        }
+
+        /// <summary>
+        /// 根据表名及参数查询数据表。
+        /// </summary>
+        /// <param name="tableName">表名。</param>
+        /// <param name="parameters">命令参数字典。</param>
+        /// <returns>数据表。</returns>
+        public DataTable SelectTable(string tableName, Dictionary<string, object> parameters)
+        {
+            var command = CommandCache.GetSelectCommand(tableName, parameters);
+            return database.Query(command);
+        }
+
+        /// <summary>
+        /// 根据表名及参数查询数据行。
+        /// </summary>
+        /// <param name="tableName">表名。</param>
+        /// <param name="parameters">命令参数字典。</param>
+        /// <returns>数据行。</returns>
+        public DataRow SelectRow(string tableName, Dictionary<string, object> parameters)
+        {
+            var data = SelectTable(tableName, parameters);
+            if (data == null || data.Rows.Count == 0)
+                return null;
+
+            return data.Rows[0];
+        }
+
+        /// <summary>
+        /// 根据表名及参数插入数据。
+        /// </summary>
+        /// <param name="tableName">表名。</param>
+        /// <param name="parameters">命令参数字典。</param>
+        public void Insert(string tableName, Dictionary<string, object> parameters)
+        {
+            var command = CommandCache.GetInsertCommand(tableName, parameters);
+            commands.Add(command);
+        }
+
+        /// <summary>
+        /// 根据表名及参数修改数据。
+        /// </summary>
+        /// <param name="tableName">表名。</param>
+        /// <param name="keyFields">主键字段名，多个用“,”分割。</param>
+        /// <param name="parameters">命令参数字典。</param>
+        public void Update(string tableName, string keyFields, Dictionary<string, object> parameters)
+        {
+            var command = CommandCache.GetUpdateCommand(tableName, keyFields, parameters);
+            commands.Add(command);
+        }
+
+        /// <summary>
+        /// 根据表名及参数删除数据。
+        /// </summary>
+        /// <param name="tableName">表名。</param>
+        /// <param name="parameters">命令参数字典。</param>
+        public void Delete(string tableName, Dictionary<string, object> parameters)
+        {
+            var command = CommandCache.GetDeleteCommand(tableName, parameters);
+            commands.Add(command);
         }
 
         /// <summary>

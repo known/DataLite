@@ -19,6 +19,17 @@ namespace DataLite
         }
 
         /// <summary>
+        /// 构造函数。
+        /// </summary>
+        /// <param name="text">SQL语句。</param>
+        /// <param name="parameters">SQL语句参数字典。</param>
+        public Command(string text, Dictionary<string, object> parameters)
+        {
+            Text = text;
+            Parameters = parameters;
+        }
+
+        /// <summary>
         /// 取得SQL语句。
         /// </summary>
         public string Text { get; }
